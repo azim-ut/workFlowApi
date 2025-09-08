@@ -1,7 +1,7 @@
 {
   "name": "azim-ut/workflowapi",
   "description": "Base workflow API library",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "license": "Apache-2.0",
   "require": {
     "php": ">=7.4"
