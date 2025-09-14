@@ -1,9 +1,12 @@
 <?php
 namespace AzimUt\WorkflowApi;
 
+use AzimUt\WorkflowApi\bean\WorkFlowBean;
+
 class WorkflowBuilder
 {
     protected string $path;
+    protected array $commands = [];
 
     public function fromJsonFile(string $path): self
     {
@@ -15,18 +18,28 @@ class WorkflowBuilder
         return $this;
     }
 
-    public function build(): array
+    public function setCommand(string $name, callable $callback = null): WorkflowBuilder{
+        if($callback == null){
+            $callback = $name;
+        }
+        $this->commands[$name] = $callback;
+        return $this;
+    }
+
+    public function build(): WorkFlowBean
     {
         $raw = file_get_contents($this->path);
-        $data = json_decode($raw, true);
+        $data = new WorkFlowBean(json_decode($raw, false));
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \RuntimeException("Invalid JSON: " . json_last_error_msg());
         }
 
+        $data->commands = $this->commands;
         // Optional: validate required keys
-        foreach (['payload', 'state', 'actions', 'workflow', 'log'] as $key) {
-            if (!array_key_exists($key, $data)) {
+        foreach (['state', 'commands', 'route', 'log'] as $key) {
+
+            if (!isset($data->$key)) {
                 throw new \RuntimeException("Missing required key: $key");
             }
         }
